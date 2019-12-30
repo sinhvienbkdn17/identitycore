@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DotNetCoreIdentityExample.Infrastructure;
 using DotNetCoreIdentityExample.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -38,7 +39,18 @@ namespace DotNetCoreIdentityExample
                 options.UseSqlServer(Configuration["Data:SportStoreIdentity:ConnectionString"]);
             });
 
-            services.AddIdentity<AppUser, IdentityRole>()
+            services.AddTransient<IPasswordValidator<AppUser>,CustomPasswordValidator>();
+            services.AddTransient<IUserValidator<AppUser>,CustomUserValidator>();
+
+            services.AddIdentity<AppUser, IdentityRole>(opts =>
+            {
+                opts.User.RequireUniqueEmail = true;
+                opts.Password.RequiredLength = 6;
+                opts.Password.RequireNonAlphanumeric = false;
+                opts.Password.RequireLowercase = false;
+                opts.Password.RequireUppercase = false;
+                opts.Password.RequireDigit = false;
+            })
                 .AddEntityFrameworkStores<AppIdentityDbContext>()
                 .AddDefaultTokenProviders();
 
